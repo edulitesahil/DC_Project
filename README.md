@@ -342,3 +342,12 @@ BitSecure includes a first-visit consent panel with **Accept All**, **Reject Opt
 ## Privacy policy
 
 The in-app Privacy Policy is available from the site footer at `#/privacy`. The policy describes account and learning-progress data, Firebase/Google services, browser storage, cookie preferences, and privacy-request limitations. Keep the policy synchronized with actual data practices whenever features or integrations change. Before public launch, add a monitored privacy contact email and implement/verify the account and data deletion process described to users.
+
+
+## Support Us
+
+The Support Us page currently accepts **direct UPI contributions**. The QR code is stored at `assets/sahil-upi-qr.svg`, and the displayed UPI ID is `8598032563@slc` (payee: Mr Sahil Kumar Patra). Contributors can scan the QR code, copy the UPI ID, or open a compatible UPI app with a selected amount.
+
+Card payments and other payment options are marked **Coming Soon** in the interface. Razorpay checkout has been temporarily removed from the frontend; the existing Cloudflare Worker Razorpay API routes are retained for possible future reactivation and are not called by the current Support Us page.
+
+**Payment-status note:** Direct UPI payments are made outside BitSecure. The site does not automatically receive or verify UPI payment confirmations, so it must not display a payment as successful or issue a verified receipt based only on a user statement or screenshot. Confirm the transaction in the receiving UPI/bank account independently.
