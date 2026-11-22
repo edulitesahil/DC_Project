@@ -25,6 +25,7 @@ import { $, $$, esc } from '../core/utils.js';
 import { CORE, GROUPS, modById } from '../modules/registry.js';
 import { refreshNav } from './navigation.js';
 import { ACH, allKeys } from './progress.js';
+import { bookmarkedIds, toggleBookmark } from '../core/bookmarks.js';
 
 /**
  * Headline and text for the "last experiment" dashboard card.
@@ -152,6 +153,8 @@ export function renderDash() {
       ${exps.length ? `<ul class="exp">${exps.map(e => `<li><a href="${e[2]}">${e[0]}</a></li>`).join('')}</ul>` : '<p class="hint">You have tried every suggested experiment. Nice work.</p>'}
       <div class="search-row">${icon('search')}<input id="dgq" type="search" placeholder="Look up a term: ACK, CRC, TTL, MSS" aria-label="Look up a glossary term"></div></div>
   </div>
+  <div class="panel" id="bookmarks-panel"><div class="bookmark-heading"><h3>★ Bookmarked modules</h3><a class="btn ghost sm" href="#/bookmarks">View all</a></div><p class="hint">Your saved lessons are kept with your account and available when you sign in on another device.</p>
+    <div class="bookmark-list">${bookmarkedIds().map(id => { const c = cards.find(x => x.k === id); return c ? `<div class="bookmark-item"><a href="${c.href}">${esc(c.t)}</a><button class="btn ghost sm" type="button" data-remove-bookmark="${esc(id)}" aria-label="Remove bookmark for ${esc(c.t)}">Remove</button></div>` : ''; }).join('') || '<p class="hint" id="empty-bookmarks">No bookmarks yet. Open a learning module and select ☆ Bookmark.</p>'}</div></div>
   <div class="panel"><h3>All modules</h3>
     <div class="filters" id="dflt"><input id="dsq" type="search" placeholder="Filter modules" aria-label="Filter modules"><button class="chipbtn on" data-g="all">All</button><button class="chipbtn" data-g="core">Core lab</button>${GROUPS.map(g => `<button class="chipbtn" data-g="${g.id}">${g.name.replace(' layer', '')}</button>`).join('')}</div>
     <div class="dgrid" id="dgrid">${cards.map(c => `<a class="mc" href="${c.href}" data-g="${c.g}" data-s="${esc((c.t + ' ' + c.d).toLowerCase())}"><span class="mc-top">${icon(c.ic)}${P.visited[c.k] ? `<span class="pill live">${icon('check')} visited</span>` : '<span class="pill">new</span>'}</span><h3>${c.t}</h3><p>${c.d}</p></a>`).join('')}</div></div>
@@ -178,6 +181,12 @@ export function renderDash() {
       location.hash = '#/m/glossary';
     }
   };
+  $('#bookmarks-panel').onclick = e => {
+    const button = e.target.closest('[data-remove-bookmark]');
+    if (!button) return;
+    toggleBookmark(button.dataset.removeBookmark);
+    renderDash();
+  };
   $('#resetP').onclick = () => {
     if (confirm('Reset all progress, achievements and notes?')) {
       resetProgress();
@@ -185,4 +194,29 @@ export function renderDash() {
       refreshNav('dash');
     }
   };
+}
+
+/**
+ * Dedicated page for viewing and managing every saved module.
+ */
+export function renderBookmarks() {
+  const root = $('#dash');
+  const cards = [
+    ...CORE.map((c, i) => ({ k: 'lab' + i, href: '#/lab/' + i, t: c[0], d: c[1], g: 'Core lab' })),
+    ...DC.mods.map(m => ({ k: m.id, href: '#/m/' + m.id, t: m.title, d: m.desc, g: GROUPS.find(x => x.id === m.group)?.name || 'Learning' })),
+  ];
+  const renderList = () => {
+    const saved = bookmarkedIds().map(id => cards.find(c => c.k === id)).filter(Boolean);
+    root.innerHTML = `
+      <section class="bookmarks-page">
+        <a class="gback" href="#/">‹ Back to dashboard</a>
+        <div class="bookmark-page-heading"><div><span class="eyebrow">YOUR LIBRARY</span><h2>★ Bookmarked Modules</h2><p class="hint">All the lessons you have saved in one place.</p></div><span class="gchip">${saved.length} saved</span></div>
+        ${saved.length ? `<div class="bookmark-page-grid">${saved.map(c => `<article class="bookmark-page-card"><div><small>${esc(c.g)}</small><h3><a href="${c.href}">${esc(c.t)}</a></h3><p>${esc(c.d)}</p></div><div class="bookmark-card-actions"><a class="btn sm" href="${c.href}">Open module →</a><button class="btn ghost sm" type="button" data-remove-bookmark="${esc(c.k)}">Remove</button></div></article>`).join('')}</div>` : '<div class="panel bookmark-empty"><h3>No bookmarks yet</h3><p class="hint">Open any learning module and select ☆ Bookmark to save it here.</p><a class="btn" href="#/">Explore modules</a></div>'}
+      </section>`;
+    root.querySelectorAll('[data-remove-bookmark]').forEach(button => button.addEventListener('click', () => {
+      toggleBookmark(button.dataset.removeBookmark);
+      renderList();
+    }));
+  };
+  renderList();
 }
