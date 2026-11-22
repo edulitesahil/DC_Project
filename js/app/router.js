@@ -29,12 +29,13 @@
 
 import { DC, S } from '../core/state.js';
 import { P, save } from '../core/storage.js';
+import { recordRecentlyViewed } from '../core/recently-viewed.js';
 import { icon, vd } from '../core/ui-helpers.js';
 import { $, esc } from '../core/utils.js';
 import { CORE, GROUPS, modById } from '../modules/registry.js';
 import { crumbs, setStage } from './navigation.js';
 import { renderDaily, renderHome, renderProfile, renderZone } from '../game/screens.js';
-import { renderBookmarks } from './dashboard.js';
+import { renderBookmarks, renderRecentlyViewed } from './dashboard.js';
 import { renderFlow } from '../game/flow.js';
 import { ZONES } from '../game/data.js';
 import { checkMeta, updatePill, visitXp } from '../game/store.js';
@@ -86,6 +87,7 @@ export function route() {
   if (kind === 'lab' && stageIds[+arg]) {
     const i = +arg;
     visitXp('lab' + i);
+    recordRecentlyViewed('lab' + i);
     currentKey = 'lab' + i;
     setStage(stageIds[i]);
     crumbs(['Core lab', CORE[i][0]]);
@@ -93,6 +95,12 @@ export function route() {
     if (i === 1) labSplit();
     if (i === 2) labPrepare();
     if (i === 3) labRecv();
+  } else if (kind === 'recent') {
+    currentKey = 'recent';
+    setStage('dash');
+    crumbs(['Dashboard', 'Recently Viewed']);
+    document.title = 'Recently Viewed · BitSecure';
+    renderRecentlyViewed();
   } else if (kind === 'bookmarks') {
     currentKey = 'bookmarks';
     setStage('dash');
@@ -182,6 +190,7 @@ export function route() {
         <section class="info-cta"><div><span class="info-kicker">EXPLORE THE PROJECT</span><h2>Learn, experiment, and build with us.</h2><p>Explore the source code, follow development, or share ideas for future simulations.</p></div><a class="btn" href="https://github.com/sahilvxky25/DC_Project" target="_blank" rel="noopener noreferrer">View on GitHub ↗</a></section>`;
   } else if (kind === 'm' && modById(arg)) {
     const m = modById(arg);
+    recordRecentlyViewed(m.id);
     currentKey = m.id;
     const g = GROUPS.find(x => x.id === m.group);
     setStage('mview');
