@@ -64,6 +64,15 @@ regMod({
     'Build a segment and see the checksum over the pseudo-header and payload.',
     'Choose the right protocol for common applications.',
   ],
+  revision: [
+    'TCP: connection-oriented; uses a three-way handshake (SYN → SYN-ACK → ACK).',
+    'TCP reliability: sequence numbers + ACKs + retransmissions; delivers an ordered byte stream.',
+    'UDP: connectionless and best-effort; no delivery or ordering guarantee; keeps datagram boundaries.',
+    'Header size: TCP = 20 bytes minimum; UDP = 8 bytes.',
+    'TCP has flow control and congestion control; UDP has neither built in.',
+    'Ports identify the sending and receiving application processes.',
+    'Checksum: covers transport data plus a pseudo-header (source IP, destination IP, protocol and length).',
+  ],
   mount(root) {
     root.innerHTML = '<div id="tutabs"></div>';
     const tabs = tabset(
